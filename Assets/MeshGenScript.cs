@@ -7,7 +7,7 @@ public class MeshGenScript : MonoBehaviour
 {
     public PhysicMaterial physicMaterial;
 
-    public Settings chunkSetting;
+    public ChunkData chunkDatas;
     public MeshEditor editor;
     public Vector3 globalPosition;
 
@@ -38,19 +38,19 @@ public class MeshGenScript : MonoBehaviour
         Mesh mesh = meshFilter.mesh;
         mesh.Clear();
         globalPosition = gameObject.transform.position;
-        chunkSetting = new Settings { globalPosition = globalPosition, currMesh = mesh, controllerScript = controllerScript };
-        editor = new MeshEditor { chunkSettings = chunkSetting };
+        chunkDatas = new ChunkData { globalPosition = globalPosition, currMesh = mesh, controllerScript = controllerScript };
+        editor = new MeshEditor { chunkDatas = chunkDatas };
     }
 
     public void CreateMap()
     {
         foreach (Vector3 key in controllerScript.mapDict[globalPosition].Keys)
         {
-            Block newBlock = new Block { localPosition = key, chunkSettings = chunkSetting, editor = editor, material = controllerScript.mapDict[globalPosition][key] };
-            this.chunkSetting.blocks.Add(key, newBlock);
+            Block newBlock = new Block { localPosition = key, chunkDatas = chunkDatas, editor = editor, material = controllerScript.mapDict[globalPosition][key] };
+            chunkDatas.blocks.Add(key, newBlock);
         }
 
-        foreach (Block block in chunkSetting.blocks.Values)
+        foreach (Block block in chunkDatas.blocks.Values)
         {
             block.Create();
         }
@@ -63,12 +63,12 @@ public class MeshGenScript : MonoBehaviour
     {
         DestroyImmediate(this.GetComponent<MeshCollider>());
         var collider = gameObject.AddComponent<MeshCollider>();
-        collider.sharedMesh = this.chunkSetting.currMesh;
+        collider.sharedMesh = this.chunkDatas.currMesh;
         collider.material = physicMaterial;
     }
 }
 
-public class Settings
+public class ChunkData
 {
     public Vector3 globalPosition;
     public Mesh currMesh;
@@ -104,7 +104,7 @@ public enum FaceType
 
 public class MeshEditor
 {
-    public Settings chunkSettings;
+    public ChunkData chunkDatas;
     private int numMats = 2;
 
     private Vector2[] uvs = new Vector2[]{
@@ -135,48 +135,48 @@ public class MeshEditor
 
     public void RenderMeshes()
     {
-        chunkSettings.currMesh.vertices = chunkSettings.newVertices.ToArray();
-        chunkSettings.currMesh.triangles = chunkSettings.newTriangles.ToArray();
-        chunkSettings.currMesh.uv = chunkSettings.newUvs.ToArray();
-        chunkSettings.currMesh.normals = chunkSettings.newNormals.ToArray();
+        chunkDatas.currMesh.vertices = chunkDatas.newVertices.ToArray();
+        chunkDatas.currMesh.triangles = chunkDatas.newTriangles.ToArray();
+        chunkDatas.currMesh.uv = chunkDatas.newUvs.ToArray();
+        chunkDatas.currMesh.normals = chunkDatas.newNormals.ToArray();
 
-        chunkSettings.currMesh.RecalculateBounds();
+        chunkDatas.currMesh.RecalculateBounds();
     }
 
     public void AddMeshes(Vector3 position, int[] verticesIndexs, int[] uvIndexs, int faceIndex, bool clockWises, Vector3 direction, int material)
     {
         for (int i = 0; i < 4; i++)
         {
-            chunkSettings.newVertices.Add(points[verticesIndexs[i]] + position);
-            chunkSettings.newUvs.Add(new Vector2(uvs[uvIndexs[i]].x, uvs[uvIndexs[i]].y / numMats + (1.0f / numMats * material)));
-            chunkSettings.newNormals.Add(direction);
+            chunkDatas.newVertices.Add(points[verticesIndexs[i]] + position);
+            chunkDatas.newUvs.Add(new Vector2(uvs[uvIndexs[i]].x, uvs[uvIndexs[i]].y / numMats + (1.0f / numMats * material)));
+            chunkDatas.newNormals.Add(direction);
         }
-
+        
         int triangleStart = faceIndex * 4;
-        if (clockWises) chunkSettings.newTriangles = chunkSettings.newTriangles.Concat(new List<int> { triangleStart + 2, triangleStart + 1, triangleStart,
+        if (clockWises) chunkDatas.newTriangles = chunkDatas.newTriangles.Concat(new List<int> { triangleStart + 2, triangleStart + 1, triangleStart,
                                                                triangleStart + 1, triangleStart + 2, triangleStart + 3 }).ToList();
-        else chunkSettings.newTriangles = chunkSettings.newTriangles.Concat(new List<int> { triangleStart, triangleStart + 1, triangleStart + 2,
+        else chunkDatas.newTriangles = chunkDatas.newTriangles.Concat(new List<int> { triangleStart, triangleStart + 1, triangleStart + 2,
                                                                triangleStart + 3, triangleStart + 2, triangleStart + 1 }).ToList();
 
     }
 
     public void DeleteMeshes(int faceIndex)
     {
-        chunkSettings.newVertices.RemoveRange(faceIndex * 4, 4);
-        chunkSettings.newTriangles.RemoveRange(faceIndex * 6, 6);
-        for (int i = faceIndex * 6; i < chunkSettings.newTriangles.Count; i++)
+        chunkDatas.newVertices.RemoveRange(faceIndex * 4, 4);
+        chunkDatas.newTriangles.RemoveRange(faceIndex * 6, 6);
+        for (int i = faceIndex * 6; i < chunkDatas.newTriangles.Count; i++)
         {
-            chunkSettings.newTriangles[i] -= 4;
+            chunkDatas.newTriangles[i] -= 4;
         }
-        chunkSettings.newUvs.RemoveRange(faceIndex * 4, 4);
-        chunkSettings.newNormals.RemoveRange(faceIndex * 4, 4);
+        chunkDatas.newUvs.RemoveRange(faceIndex * 4, 4);
+        chunkDatas.newNormals.RemoveRange(faceIndex * 4, 4);
     }
 }
 
 
 public class Block
 {
-    public Settings chunkSettings;
+    public ChunkData chunkDatas;
     public MeshEditor editor;
     public Vector3 localPosition;
     public int material;
@@ -197,15 +197,15 @@ public class Block
     public bool FaceCheckNear(int faceIndex)
     {
         Vector3 blockToCheck = localPosition + normalIndex2[faceIndex];
-        Dictionary<Vector3, Dictionary<Vector3, int>> checkDict = chunkSettings.controllerScript.mapDict;
+        Dictionary<Vector3, Dictionary<Vector3, int>> checkDict = chunkDatas.controllerScript.mapDict;
 
 
-        if (checkDict[chunkSettings.globalPosition].ContainsKey(blockToCheck)) return true;
+        if (checkDict[chunkDatas.globalPosition].ContainsKey(blockToCheck)) return true;
 
-        Vector3 chunkPos = chunkSettings.controllerScript.getChunk(chunkSettings.globalPosition + blockToCheck);
+        Vector3 chunkPos = chunkDatas.controllerScript.getChunk(chunkDatas.globalPosition + blockToCheck);
         if (blockToCheck.x == 16) // check if on the edge of other chunks
         {
-            Vector3 PosCheck = chunkSettings.globalPosition + nearFaces[0];
+            Vector3 PosCheck = chunkDatas.globalPosition + nearFaces[0];
             if (checkDict.ContainsKey(PosCheck))
             {
                 if (checkDict[PosCheck].ContainsKey(blockToCheck - nearFaces[0])) return true;
@@ -213,7 +213,7 @@ public class Block
         }
         if (blockToCheck.x == -1) // check if on the edge of other chunks
         {
-            Vector3 PosCheck = chunkSettings.globalPosition + nearFaces[1];
+            Vector3 PosCheck = chunkDatas.globalPosition + nearFaces[1];
             if (checkDict.ContainsKey(PosCheck))
             {
                 if (checkDict[PosCheck].ContainsKey(blockToCheck - nearFaces[1])) return true;
@@ -221,7 +221,7 @@ public class Block
         }
         if (blockToCheck.z == 16) // check if on the edge of other chunks
         {
-            Vector3 PosCheck = chunkSettings.globalPosition + nearFaces[2];
+            Vector3 PosCheck = chunkDatas.globalPosition + nearFaces[2];
             if (checkDict.ContainsKey(PosCheck))
             {
                 if (checkDict[PosCheck].ContainsKey(blockToCheck - nearFaces[2])) return true;
@@ -229,7 +229,7 @@ public class Block
         }
         if (blockToCheck.z == -1) // check if on the edge of other chunks
         {
-            Vector3 PosCheck = chunkSettings.globalPosition + nearFaces[3];
+            Vector3 PosCheck = chunkDatas.globalPosition + nearFaces[3];
             if (checkDict.ContainsKey(PosCheck))
             {
                 if (checkDict[PosCheck].ContainsKey(blockToCheck - nearFaces[3])) return true;
@@ -251,8 +251,8 @@ public class Block
         {
             if (!FaceCheckNear(i))
             {
-                faces.Add(new Face { faceDirection = allFaces[i], faceIndex = chunkSettings.lastFaceIndex, created = false });
-                chunkSettings.lastFaceIndex++;
+                faces.Add(new Face { faceDirection = allFaces[i], faceIndex = chunkDatas.lastFaceIndex, created = false });
+                chunkDatas.lastFaceIndex++;
             }
         }
 
@@ -305,14 +305,14 @@ public class Block
             numFacesDeletion++;
         }
 
-        foreach (Block currBlock in chunkSettings.blocks.Values)
+        foreach (Block currBlock in chunkDatas.blocks.Values)
         {
             if (currBlock != this)
             {
                 currBlock.SubtractFaceIndex(maxFaceIndex, numFacesDeletion);
             }
         }
-        chunkSettings.lastFaceIndex = chunkSettings.lastFaceIndex - numFacesDeletion;
+        chunkDatas.lastFaceIndex = chunkDatas.lastFaceIndex - numFacesDeletion;
     }
 }
     //public void CheckFace()

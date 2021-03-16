@@ -174,8 +174,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9a59bb8cbe59c544aa24de1650b55b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slideMovement: 1
-  jumpMovement: 6
   controller: {fileID: 656761420}
 --- !u!1 &656761419
 GameObject:
@@ -520,6 +518,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5046c5632287acc41aed658cfda18af5,
         type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5046c5632287acc41aed658cfda18af5,
+        type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.16
       objectReference: {fileID: 0}
@@ -531,7 +534,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 5046c5632287acc41aed658cfda18af5,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 4.2
+      value: 5.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5046c5632287acc41aed658cfda18af5,
         type: 3}

@@ -13,12 +13,12 @@ public class Controller : MonoBehaviour
     void Start()
     {
         noise = new FastNoiseLite();
-        noise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
+        noise.SetNoiseType(gameSettings.noiseType);
 
 
-        for (int x = -chunkConstants.minRenderDistance; x < chunkConstants.minRenderDistance; x++)
+        for (int x = -gameSettings.minRenderDistance; x < gameSettings.minRenderDistance; x++)
         {
-            for (int y = -chunkConstants.minRenderDistance; y < chunkConstants.minRenderDistance; y++)
+            for (int y = -gameSettings.minRenderDistance; y < gameSettings.minRenderDistance; y++)
             {
                 Vector3 chunkPos = new Vector3(x * 16, 0, y * 16);
                 GameObject newChunk = Instantiate(parentChunk, chunkPos, transform.rotation);
@@ -61,16 +61,16 @@ public class Controller : MonoBehaviour
     public void DefaultChunkMap(Vector3 chunkPosition)
     {
         mapDict.Add(chunkPosition, new Dictionary<Vector3, int>());
-        for (int x = 0; x < chunkConstants.length; x++)
+        for (int x = 0; x < gameSettings.length; x++)
         {
-            for (int z = 0; z < chunkConstants.width; z++)
+            for (int z = 0; z < gameSettings.width; z++)
             {
                 UpdateMap(new Vector3(x, 2, z), 1, chunkPosition);
                 UpdateMap(new Vector3(x, 1, z), 1, chunkPosition);
                 UpdateMap(new Vector3(x, 0, z), 1, chunkPosition);
 
-                float noiseGen = noise.GetNoise((x + chunkPosition.x) * chunkConstants.noiseConcentration, (z + chunkPosition.z) * chunkConstants.noiseConcentration) + 1;
-                int height = (int)(noiseGen * chunkConstants.noiseMultiplication - chunkConstants.noiseMultiplication + 2) + 2;
+                float noiseGen = noise.GetNoise((x + chunkPosition.x) * gameSettings.noiseConcentration, (z + chunkPosition.z) * gameSettings.noiseConcentration) + 1;
+                int height = (int)(noiseGen * gameSettings.noiseMultiplication - gameSettings.noiseMultiplication + 2) + 2;
                 //Debug.Log(noiseGen);
                 for (int y = 0; y < height; y++)
                 {
@@ -95,16 +95,3 @@ public class Controller : MonoBehaviour
     }
 }
 
-public static class chunkConstants
-{
-    public const int length = 16;
-    public const int width = 16;
-    public const int height = 1;
-
-    public const int minRenderDistance = 2; // It is the actual distance divided by 2
-    public const int maxRenderDistance = 8;
-
-    // Noise Settings
-    public const float noiseConcentration = 4;
-    public const float noiseMultiplication = 3;
-}
