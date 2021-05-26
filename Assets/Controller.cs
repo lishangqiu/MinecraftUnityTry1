@@ -70,7 +70,8 @@ public class Controller : MonoBehaviour
                 UpdateMap(new Vector3(x, 0, z), 1, chunkPosition);
 
                 float noiseGen = noise.GetNoise((x + chunkPosition.x) * gameSettings.noiseConcentration, (z + chunkPosition.z) * gameSettings.noiseConcentration) + 1;
-                int height = (int)(noiseGen * gameSettings.noiseMultiplication - gameSettings.noiseMultiplication + 2) + 2;
+                //int height = (int)(noiseGen * gameSettings.noiseMultiplication - gameSettings.noiseMultiplication + 2) + 2;
+                int height = 2;
                 //Debug.Log(noiseGen);
                 for (int y = 0; y < height; y++)
                 {

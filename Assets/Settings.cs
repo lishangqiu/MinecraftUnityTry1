@@ -17,11 +17,11 @@ public static class gameSettings
     public const FastNoiseLite.NoiseType noiseType = FastNoiseLite.NoiseType.Perlin;
 
 
-
     //player controls settings
-    public const float slideMovement = 2;
-    public const float jumpMovement = 6f;
-    public const float groundFrictionRatio = 0.95f;
-
+    public const float slideMovement = 17;
+    public const float jumpMovement = 150f;
+    public const float groundFriction = 0.65f;
+    public const float PlayerMaxSpeed = 5f;
+    public const float breakCount = 3f;
 
 } 
